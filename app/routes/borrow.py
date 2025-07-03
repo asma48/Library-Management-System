@@ -78,3 +78,23 @@ def Return(book_id: int, db: db_session, current_user: Annotated[dict, Depends(g
                                     "status": 200}, status_code=status.HTTP_200_OK)
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
+    
+
+
+@borrow_router.get("/borrowed_books/{user_id}")
+def Borrowed_books(user_id: int, db: db_session, current_user: Annotated[dict, Depends(get_current_user)]):
+    if current_user.role in  ["user" , "admin"]:
+        db_borrowed = db.query(Borrower).filter(Borrower.user_id == user_id, Borrower.deleted_at == None).all()
+        borrow_books = []
+        for borrow in db_borrowed:
+            db_borrowed_book = db.query(Borrower_Books).filter(Borrower_Books.borrower_id == borrow.id, Borrower_Books.deleted_at==None).first()
+            borrow_books.append({
+                "borrow_id": borrow.id,
+                "book_id" : db_borrowed_book.book_id
+            })
+        
+        return borrow_books
+    else: 
+        return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
+    
+    
