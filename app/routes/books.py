@@ -19,13 +19,13 @@ book_router = APIRouter(
 @book_router.post("/create")
 def new_book(book:Create_Book, db: db_session, current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin", "staff"]:
-        db_book = db.query(Books).filter(Books.name == book.name, Books.deleted_at == None).first()
+        db_book = db.query(Books).filter(Books.title == book.title, Books.deleted_at == None).first()
         if db_book is not None:
             return JSONResponse(content={"message": "Book already exist", "status": 406}, status_code=status.HTTP_406_NOT_ACCEPTABLE)
         
         db_create_book = Books(title = book.title, isbn = book.isbn, 
                                author_id = book.author_id, published_date = book.published_date, 
-                               available = True, created_at = datetime.now())
+                               available = True, create_at = datetime.now())
         db.add(db_create_book)
         db.commit()
         db.refresh(db_create_book) 
@@ -43,14 +43,11 @@ def new_book(book:Create_Book, db: db_session, current_user: Annotated[dict, Dep
 def list_of_books(db:db_session , current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin" , "staff"]:
         db_books = db.query(Books).filter(Books.deleted_at == None).all()
-        books_list = [Books_List.model_validate(books).model_dump() for books in db_books]
-        return JSONResponse(
-            content={
-                "message": "List of Author",
-                "data": Books_List
-            }, 
-            status_code=status.HTTP_200_OK
-        )
+        books_list = []
+        for book in db_books:
+            books_list.append(book)
+        return books_list
+
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
 
@@ -65,26 +62,27 @@ def author(book_id: int, db:db_session, current_user: Annotated[dict, Depends(ge
         
         return JSONResponse(content={ "message": "Book", "data":{"id": db_book.id, "title": db_book.title, 
                                                                 "isbn": db_book.isbn, "author_id": db_book.author_id, 
-                                                                "publish_date": db_book.published_date}, 
+                                                                "publish_date": db_book.published_date.isoformat()}, 
                                     "status": 200}, status_code=status.HTTP_200_OK)
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
 
 @book_router.put("/update/{id}")
 def update_book(id:int, book: Update_Book, db:db_session, current_user: Annotated[dict, Depends(get_current_user)]):
-    if current_user.role in  ["admin" ,"staff"]:
+    if current_user.get("role") in  ["admin" ,"staff"]:
         db_book = db.query(Books).filter(Books.id == id, Books.deleted_at == None).first()    
-        if book != db_book:
+        if book.title is not None:
             db_book.title = book.title
+        if book.isbn is not None:
             db_book.isbn = book.isbn
+        if book.author_id is not None:
             db_book.author_id = book.author_id
+        if book.published_date is not None:
             db_book.published_date = book.published_date
-            db_book.updated_at = datetime.now()
+        db_book.updated_at = datetime.now()
         db.commit()
         db.refresh(db_book)
-        updated_book = Books_List.model_validate(db_book).model_dump()
-
-        return JSONResponse(content={"message":"Successfully Updated", "data": updated_book, 
+        return JSONResponse(content={"message":"Successfully Updated", 
                             "status" : 200}, status_code=status.HTTP_200_OK)
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)

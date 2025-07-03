@@ -23,7 +23,7 @@ def new_author(author:Create_Author, db: db_session, current_user: Annotated[dic
         if db_author is not None:
             return JSONResponse(content={"message": "author already existed", "status": 406}, status_code=status.HTTP_406_NOT_ACCEPTABLE)
         
-        db_create_author = Author(name = author.name, bio = author.bio)
+        db_create_author = Author(name = author.name, bio = author.bio, create_at = datetime.now())
         db.add(db_create_author)
         db.commit()
         db.refresh(db_create_author) 
@@ -41,20 +41,18 @@ def new_author(author:Create_Author, db: db_session, current_user: Annotated[dic
 def list_of_authors(db:db_session , current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin" , "staff"]:
         db_authors = db.query(Author).filter(Author.deleted_at == None).all()
-        author_list = [Author_List.model_validate(author).model_dump() for author in db_authors]
+        author_list = []
+        for author in db_authors:
+            author_list.append(author)
 
-        return JSONResponse(
-            content={
-                "message": "List of Author",
-                "data": author_list
-            }
-        )
+        return  author_list
+
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @author_router.get("/{author_id}")
-def author(author_id: int, db:db_session, current_user: Annotated[dict, Depends(get_current_user)]):
+def author(author_id: int ,db:db_session, current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin" , "staff"]:
         db_author = db.query(Author).filter(Author.id == author_id, Author.deleted_at == None).first()
         if db_author is None:

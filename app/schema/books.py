@@ -25,8 +25,8 @@ class Books_List(BaseModel):
 
 
 class Update_Book(BaseModel):
-    title:str 
-    isbn : int
-    author_id: int
-    published_date: date
-    last_borrowed_date: datetime
+
+    title:Optional[str] 
+    isbn : Optional[int]
+    author_id: Optional[int]
+    published_date: Optional[date]
