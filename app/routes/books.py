@@ -10,10 +10,7 @@ from ..schema.books import Create_Book, Books_List, Update_Book
 
 
 
-book_router = APIRouter(
-    prefix = "/books" ,
-    tags = ["Books"]
-)
+book_router = APIRouter()
 
 
 @book_router.post("/create")

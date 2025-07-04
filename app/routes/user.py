@@ -12,8 +12,7 @@ from ..middleware.jwt import get_current_user, create_access_token, authenticate
 
 
 user_router = APIRouter(
-    prefix= "/user",
-    tags=["User"]
+
 
 )
 

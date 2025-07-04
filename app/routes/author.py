@@ -10,8 +10,8 @@ from ..schema.author import Create_Author, Author_List, Author_Update
 
 
 author_router = APIRouter(
-    prefix= "/author",
-    tags= ["Author"]
+    ,
+    
 )
 
 

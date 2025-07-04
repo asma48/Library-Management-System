@@ -7,10 +7,7 @@ from fastapi.responses import JSONResponse
 from ..middleware.jwt import get_current_user
 from ..models.database_model import Books, Borrower, Borrower_Books, User
 
-borrow_router = APIRouter(
-    prefix = "/borrow" ,
-    tags = ["Borrowing"]
-)
+borrow_router = APIRouter()
 
 @borrow_router.put("/borrow/{book_id}")
 def Borrow(book_id: int, db: db_session, current_user: Annotated[dict, Depends(get_current_user)]):
