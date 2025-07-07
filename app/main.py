@@ -21,6 +21,8 @@ app.include_router(book_router, prefix = "/books" ,tags = ["Books"])
 
 
 
+
+
 #@app.on_event("startup")
 #def startup_event():
 #    db = SessionLocal()
