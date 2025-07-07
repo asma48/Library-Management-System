@@ -85,6 +85,7 @@ class Borrower(Base):
     updated_at = Column(DateTime, nullable=True)
     deleted_at = Column(DateTime, nullable=True)
     deleted_by = Column(String, nullable=True)
+    
     books = relationship("Borrower_Books", back_populates="borrowers")
     users = relationship("User", back_populates="borrowers")
     

@@ -26,7 +26,7 @@ class Books_List(BaseModel):
 
 class Update_Book(BaseModel):
 
-    title:Optional[str] 
-    isbn : Optional[int]
-    author_id: Optional[int]
-    published_date: Optional[date]
+    title:Optional[str] = None
+    isbn : Optional[int] = None
+    author_id: Optional[int] = None
+    published_date: Optional[date] = None

@@ -9,10 +9,7 @@ from ..middleware.jwt import get_current_user
 from ..schema.author import Create_Author, Author_List, Author_Update
 
 
-author_router = APIRouter(
-    prefix= "/author",
-    tags= ["Author"]
-)
+author_router = APIRouter()
 
 
 

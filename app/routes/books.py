@@ -10,10 +10,7 @@ from ..schema.books import Create_Book, Books_List, Update_Book
 
 
 
-book_router = APIRouter(
-    prefix = "/books" ,
-    tags = ["Books"]
-)
+book_router = APIRouter()
 
 
 @book_router.post("/create")
@@ -45,8 +42,17 @@ def list_of_books(db:db_session , current_user: Annotated[dict, Depends(get_curr
         db_books = db.query(Books).filter(Books.deleted_at == None).all()
         books_list = []
         for book in db_books:
-            books_list.append(book)
-        return books_list
+            books_list.append({
+                "book_id": book.id,
+                "book_title" : book.title,
+                "Availability" : book.available,
+                "Author_id" : book.author_id,
+            })
+        return JSONResponse(content={
+                        "message": "Books",
+                        "data": books_list, 
+                        "status":200},
+                        status_code=status.HTTP_200_OK)
 
     else: 
         return JSONResponse(content={"message": "You don't have permission to perform this action", "status": 401}, status_code=status.HTTP_401_UNAUTHORIZED)
@@ -69,8 +75,11 @@ def author(book_id: int, db:db_session, current_user: Annotated[dict, Depends(ge
 
 @book_router.put("/update/{id}")
 def update_book(id:int, book: Update_Book, db:db_session, current_user: Annotated[dict, Depends(get_current_user)]):
-    if current_user.get("role") in  ["admin" ,"staff"]:
-        db_book = db.query(Books).filter(Books.id == id, Books.deleted_at == None).first()    
+    if current_user.role in  ["admin" ,"staff"]:
+        db_book = db.query(Books).filter(Books.id == id, Books.deleted_at == None).first()
+        if not db_book:
+            return JSONResponse(content={"message":"Book Does Not Exist", 
+                            "status" : 200}, status_code=status.HTTP_200_OK)        
         if book.title is not None:
             db_book.title = book.title
         if book.isbn is not None:
@@ -91,7 +100,7 @@ def update_book(id:int, book: Update_Book, db:db_session, current_user: Annotate
 
 
 
-@book_router.delete("/delete/{book_id}")
+@book_router.delete("/delete/{id}")
 def delete_book(id: int, db:db_session , current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin" , "staff"]:
         db_book = db.query(Books).filter(Books.id == id, Books.deleted_at == None).first()
