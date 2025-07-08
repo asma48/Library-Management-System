@@ -11,8 +11,6 @@ from ..schema.author import Create_Author, Author_List, Author_Update
 
 author_router = APIRouter()
 
-
-
 @author_router.post("/create")
 def new_author(author:Create_Author, db: db_session, current_user: Annotated[dict, Depends(get_current_user)]):
     if current_user.role in  ["admin" , "staff"]:
